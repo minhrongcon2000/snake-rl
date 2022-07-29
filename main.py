@@ -2,10 +2,13 @@ import os
 import random
 
 import numpy as np
+import wandb
 from env_wrapper import wrap_deepmind
 from model import DQN
 import tianshou as ts
 import torch
+import argparse
+from torch.utils.tensorboard import SummaryWriter
 
 def make_atari_env(env_id, frame_stack=4):
     return wrap_deepmind(env_id=env_id, frame_stack=frame_stack)
@@ -23,6 +26,7 @@ def set_global_seed(seed=42):
 
 def test_dqn(env_id,
              action_space,
+             wandb_api_key,
              frame_stack=4,
              train_num=1,
              test_num=1,
@@ -39,6 +43,7 @@ def test_dqn(env_id,
              eps_train_min=0.05,
              eps_test=0.005,
              n_step=1):
+    os.environ["WANDB_API_KEY"] = wandb_api_key
     device = "cuda" if torch.cuda.is_available() else "cpu"
     train_envs = ts.env.ShmemVectorEnv(
         [lambda: make_atari_env(env_id) for _ in range(train_num)])
@@ -76,10 +81,11 @@ def test_dqn(env_id,
         buffer=buffer,
         exploration_noise=True
     )
-    
+    wandb.init(settings=wandb.Settings(start_method='thread'))
     logger = ts.utils.WandbLogger(save_interval=1,
                                   project=env_id,
                                   name="dqn")
+    logger.load(SummaryWriter("logs"))
     
     
     def save_fn(policy):
@@ -128,4 +134,8 @@ def test_dqn(env_id,
 
 if __name__ == "__main__":
     set_global_seed()
-    test_dqn("snake-gym-10x20-v0", 4)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--wandb_api_key", type=str)
+    args = parser.parse_args()
+    wandb_api_key = args.wandb_api_key
+    test_dqn("snake-gym-10x20-v0", 4, wandb_api_key)
