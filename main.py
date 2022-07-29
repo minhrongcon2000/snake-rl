@@ -1,3 +1,7 @@
+import os
+import random
+
+import numpy as np
 from env_wrapper import wrap_deepmind
 from model import DQN
 import tianshou as ts
@@ -5,6 +9,16 @@ import torch
 
 def make_atari_env(env_id, frame_stack=4):
     return wrap_deepmind(env_id=env_id, frame_stack=frame_stack)
+
+
+def set_global_seed(seed=42):
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = True
 
 
 def test_dqn(env_id,
@@ -113,4 +127,5 @@ def test_dqn(env_id,
     return result
 
 if __name__ == "__main__":
+    set_global_seed()
     test_dqn("snake-gym-10x20-v0", 4)
