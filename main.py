@@ -83,7 +83,8 @@ def test_dqn(env_id,
     )
     wandb.init(settings=wandb.Settings(start_method='thread'))
     logger = ts.utils.WandbLogger(save_interval=1,
-                                  project=env_id,
+                                  name="snake-dqn",
+                                  project="snake-rl",
                                   name="dqn")
     logger.load(SummaryWriter("logs"))
     
