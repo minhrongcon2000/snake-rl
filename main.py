@@ -28,7 +28,7 @@ def test_dqn(env_id,
              action_space,
              wandb_api_key,
              frame_stack=4,
-             train_num=1,
+             train_num=10,
              test_num=1,
              lr=0.0001,
              gamma=0.99,
@@ -107,7 +107,7 @@ def test_dqn(env_id,
         policy.set_eps(eps_test)
         
     def stop_fn(mean_reward):
-        return mean_reward >= 20
+        return mean_reward >= 20 * 10 - 2
     
     # test train_collector and start filling replay buffer
     train_collector.collect(n_step=batch_size * train_num)
