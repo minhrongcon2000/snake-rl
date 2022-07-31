@@ -38,7 +38,7 @@ run = wandb.init(
 )
 
 env = make_snake_env()
-model = DQN("CnnPolicy", env, tensorboard_log=f"runs/{run.id}")
+model = DQN("CnnPolicy", env, tensorboard_log=f"runs/{run.id}", buffer_size=100000)
 model.learn(
     total_timesteps=config["total_timesteps"], 
     callback=WandbCallback(
