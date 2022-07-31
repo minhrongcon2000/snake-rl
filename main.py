@@ -17,6 +17,7 @@ def make_snake_env():
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--wandb_api_key", type=str)
+parser.add_argument("--total_timestep", type=int)
 args = parser.parse_args()
 
 key = args.wandb_api_key
@@ -25,7 +26,7 @@ os.environ["WANDB_API_KEY"] = key
 
 config = {
     "policy_type": "CnnPolicy",
-    "total_timesteps": int(2e5),
+    "total_timesteps": args.total_timestep,
     "env_name": "snake-gym-grid-10x20-v0",
 }
 run = wandb.init(
