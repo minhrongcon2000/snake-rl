@@ -11,8 +11,8 @@ import argparse
 
 def make_snake_env():
     env = make_vec_env("snake-gym-grid-10x20-v0", 4)
-    env = VecFrameStack(env, 2)
     env = VecNormalize(env, clip_obs=1.0)
+    env = VecFrameStack(env, 2)
     return env
 
 
