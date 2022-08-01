@@ -1,6 +1,6 @@
 from stable_baselines3.common.atari_wrappers import WarpFrame, MaxAndSkipEnv, EpisodicLifeEnv
 from stable_baselines3.common.env_util import make_vec_env
-from stable_baselines3.common.vec_env import VecFrameStack
+from stable_baselines3.common.vec_env import VecFrameStack, VecNormalize
 from stable_baselines3 import DQN
 import gym
 import snake_gym_grid.snake_gym_grid
@@ -12,6 +12,7 @@ import argparse
 def make_snake_env():
     env = make_vec_env("snake-gym-grid-10x20-v0", 4)
     env = VecFrameStack(env, 2)
+    env = VecNormalize(env, clip_obs=1.0)
     return env
 
 
