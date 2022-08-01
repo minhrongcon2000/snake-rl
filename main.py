@@ -9,9 +9,13 @@ from wandb.integration.sb3 import WandbCallback
 import os
 import argparse
 
+
 def make_snake_env():
-    env = make_vec_env("snake-gym-grid-10x20-v0", 4)
-    env = VecNormalize(env, clip_obs=1.0)
+    def wrap_single_env(env):
+        env = WarpFrame(env)
+        env = MaxAndSkipEnv(env, 2)
+        return env
+    env = make_vec_env("snake-gym-grid-10x20-v0", 4, wrapper_class=wrap_single_env)
     env = VecFrameStack(env, 2)
     return env
 
