@@ -16,7 +16,7 @@ def make_snake_env():
         env = MaxAndSkipEnv(env, 2)
         return env
     env = make_vec_env("snake-gym-grid-10x20-v0", 4, wrapper_class=wrap_single_env)
-    env = VecFrameStack(env, 2)
+    env = VecFrameStack(env, 4)
     return env
 
 
