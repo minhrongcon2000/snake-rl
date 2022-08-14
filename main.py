@@ -1,6 +1,6 @@
 from stable_baselines3.common.atari_wrappers import WarpFrame, MaxAndSkipEnv
 from stable_baselines3.common.env_util import make_vec_env
-from stable_baselines3.common.vec_env import VecFrameStack, VecNormalize
+from stable_baselines3.common.vec_env import VecFrameStack
 from stable_baselines3 import DQN
 import gym
 import snake_gym_grid.snake_gym_grid
@@ -9,14 +9,16 @@ from wandb.integration.sb3 import WandbCallback
 import os
 import argparse
 
+from wrapper import NormFrame
+
 
 def make_snake_env():
     def wrap_single_env(env):
         env = WarpFrame(env)
+        env = NormFrame(env)
         env = MaxAndSkipEnv(env, 2)
         return env
     env = make_vec_env("snake-gym-grid-10x20-tiny-v0", 4, wrapper_class=wrap_single_env)
-    env = VecNormalize(env, norm_obs=True, norm_reward=False)
     env = VecFrameStack(env, 2)
     return env
 
