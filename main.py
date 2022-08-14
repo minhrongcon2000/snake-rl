@@ -1,9 +1,9 @@
-from stable_baselines3.common.atari_wrappers import WarpFrame, MaxAndSkipEnv, EpisodicLifeEnv
+from stable_baselines3.common.atari_wrappers import WarpFrame, MaxAndSkipEnv
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.vec_env import VecFrameStack, VecNormalize
-from stable_baselines3 import PPO
+from stable_baselines3 import DQN
 import gym
-from snake_gym_grid.snake_gym_grid.envs.snake_gym_grid import SnakeGymGrid
+import snake_gym_grid.snake_gym_grid
 import wandb
 from wandb.integration.sb3 import WandbCallback
 import os
@@ -15,7 +15,8 @@ def make_snake_env():
         env = WarpFrame(env)
         env = MaxAndSkipEnv(env, 2)
         return env
-    env = make_vec_env(SnakeGymGrid, 4, wrapper_class=wrap_single_env)
+    env = make_vec_env("snake-gym-grid-10x20-tiny-v0", 4, wrapper_class=wrap_single_env)
+    env = VecNormalize(env, norm_obs=True, norm_reward=False)
     env = VecFrameStack(env, 2)
     return env
 
@@ -38,13 +39,13 @@ run = wandb.init(
     project="snake_rl_sb3",
     config=config,
     sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
-    # monitor_gym=True,  # auto-upload the videos of agents playing the game
+    monitor_gym=True,  # auto-upload the videos of agents playing the game
     # save_code=True,  # optional
-    name="PPO"
+    name="DQN"
 )
 
 env = make_snake_env()
-model = PPO("CnnPolicy", env, tensorboard_log=f"runs/{run.id}", batch_size=128)
+model = DQN("CnnPolicy", env, tensorboard_log=f"runs/{run.id}", batch_size=128)
 model.learn(
     total_timesteps=config["total_timesteps"], 
     callback=WandbCallback(
