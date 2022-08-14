@@ -19,7 +19,6 @@ def make_snake_env():
         env = MaxAndSkipEnv(env, 2)
         return env
     env = make_vec_env("snake-gym-grid-10x20-tiny-v0", 4, wrapper_class=wrap_single_env)
-    env = VecFrameStack(env, 2)
     return env
 
 
@@ -47,7 +46,7 @@ run = wandb.init(
 )
 
 env = make_snake_env()
-model = DQN("CnnPolicy", env, tensorboard_log=f"runs/{run.id}", batch_size=128)
+model = DQN("CnnPolicy", env, tensorboard_log=f"runs/{run.id}", batch_size=128, buffer_size=100000)
 model.learn(
     total_timesteps=config["total_timesteps"], 
     callback=WandbCallback(
