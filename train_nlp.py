@@ -81,6 +81,14 @@ parser.add_argument(
     help="Key for wandb"
 )
 
+parser.add_argument(
+    "--device",
+    type=str,
+    default="cpu",
+    choices=["cpu", "cuda"],
+    help="whether to use cuda or cpu"
+)
+
 args = parser.parse_args()
 
 feature_shape = 8 # specifically for snake 1D, cannot be changed
@@ -114,7 +122,7 @@ if __name__ == "__main__":
         [lambda: gym.make("snake-gym-grid-10x20-1d-v0") for _ in range(num_test_env)])
 
     # model construction
-    model = MLPNet(feature_shape, num_action)
+    model = MLPNet(feature_shape, num_action, device=args.device).to(args.device)
     optim = torch.optim.Adam(model.parameters(), lr=1e-3)
 
     # Double DQN because vanilla is kinda sht!

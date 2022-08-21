@@ -2,8 +2,9 @@ import torch
 
 
 class MLPNet(torch.nn.Module):
-    def __init__(self, input_dims, output_dims) -> None:
+    def __init__(self, input_dims, output_dims, device) -> None:
         super().__init__()
+        self.device = device
         self.input_dims = input_dims
         self.output_dims = output_dims
         self.model = torch.nn.Sequential(
@@ -18,7 +19,7 @@ class MLPNet(torch.nn.Module):
         
     def forward(self, obs, state=None, info={}):
         if not isinstance(obs, torch.Tensor):
-            obs = torch.tensor(obs, dtype=torch.float32)
+            obs = torch.tensor(obs, dtype=torch.float32, device=self.device)
             
         logits = self.model(obs.view(obs.shape[0], -1))
         return logits, state
