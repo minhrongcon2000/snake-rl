@@ -111,7 +111,7 @@ max_time_steps = int(num_epochs * args.exp_portion)
 batch_size = args.batch_size
 
 def linear_exploration(eps, max_eps, min_eps, max_time_steps):
-    return min(eps - (max_eps - min_eps) / max_time_steps, min_eps)
+    return max(eps - (max_eps - min_eps) / max_time_steps, min_eps)
 
 if __name__ == "__main__":
     # Vec env construction for both train and test
