@@ -107,7 +107,7 @@ if args.wandb_api_key is not None:
 # for exploration step
 max_eps = args.max_eps
 min_eps = args.min_eps
-max_time_steps = args.exp_portion
+max_time_steps = int(num_epochs * args.exp_portion)
 batch_size = args.batch_size
 
 def linear_exploration(eps, max_eps, min_eps, max_time_steps):
