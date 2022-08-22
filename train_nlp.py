@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import tianshou as ts
 import gym
@@ -118,6 +119,13 @@ parser.add_argument(
     help="target network update frequency"
 )
 
+parser.add_argument(
+    "--chkpt_path",
+    type=str,
+    default="dqn_{}.pth".format(datetime.now()),
+    help="model path"
+)
+
 args = parser.parse_args()
 
 feature_shape = 8 # specifically for snake 1D, cannot be changed
@@ -213,3 +221,5 @@ if __name__ == "__main__":
                                         min_eps=min_eps, 
                                         max_time_steps=max_time_steps)
         policy.set_eps(current_eps)
+
+torch.save(policy.state_dict(), args.chkpt_path)
