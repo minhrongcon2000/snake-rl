@@ -90,6 +90,20 @@ parser.add_argument(
     help="whether to use cuda or cpu"
 )
 
+parser.add_argument(
+    "--max_no_eating",
+    type=int,
+    default=200,
+    help="limit the number of redundant movement when training snake"
+)
+
+parser.add_argument(
+    "--max_buffer_size",
+    type=int,
+    default=100000,
+    help="max buffer size"
+)
+
 args = parser.parse_args()
 
 feature_shape = 8 # specifically for snake 1D, cannot be changed
@@ -114,18 +128,18 @@ batch_size = args.batch_size
 def linear_exploration(eps, max_eps, min_eps, max_time_steps):
     return max(eps - (max_eps - min_eps) / max_time_steps, min_eps)
 
-def make_snake_env(env_id):
+def make_snake_env(env_id, max_no_eating):
     env = gym.make(env_id)
-    env = NoImprovementWrapper(env)
+    env = NoImprovementWrapper(env, max_no_eat_times=max_no_eating)
     return env
 
 if __name__ == "__main__":
     # Vec env construction for both train and test
     train_envs = ts.env.DummyVectorEnv(
-        [lambda: make_snake_env("snake-gym-grid-10x20-1d-v0") for _ in range(num_train_env)])
+        [lambda: make_snake_env("snake-gym-grid-10x20-1d-v0", max_no_eating=args.max_no_eating) for _ in range(num_train_env)])
 
     test_envs = ts.env.DummyVectorEnv(
-        [lambda: make_snake_env("snake-gym-grid-10x20-1d-v0") for _ in range(num_test_env)])
+        [lambda: make_snake_env("snake-gym-grid-10x20-1d-v0", max_no_eating=args.max_no_eating) for _ in range(num_test_env)])
 
     # model construction
     model = MLPNet(feature_shape, num_action, device=args.device).to(args.device)
@@ -144,7 +158,7 @@ if __name__ == "__main__":
     train_collector = ts.data.Collector(
         policy=policy,
         env=train_envs,
-        buffer=ts.data.VectorReplayBuffer(100000, 10),
+        buffer=ts.data.VectorReplayBuffer(args.max_buffer_size, args.num_train_env),
         exploration_noise=True
     )
 
@@ -179,7 +193,7 @@ if __name__ == "__main__":
                 "reward_std": result["rew_std"],
                 "eps": current_eps,
             })
-        print(f"Epoch {i + 1}, mean_reward: {result['rew']}, reward_std: {result['rew_std']}")
+        print(f"Epoch {i + 1}, mean_reward: {result['rew']}, reward_std: {result['rew_std']}, eps: {current_eps}")
         current_eps = linear_exploration(current_eps, 
                                         max_eps=max_eps, 
                                         min_eps=min_eps, 
