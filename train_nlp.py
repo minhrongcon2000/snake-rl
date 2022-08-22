@@ -2,6 +2,7 @@ import os
 import tianshou as ts
 import gym
 import snake_gym_grid
+from snake_gym_grid.wrappers import NoImprovementWrapper
 import torch
 import wandb
 
@@ -113,13 +114,18 @@ batch_size = args.batch_size
 def linear_exploration(eps, max_eps, min_eps, max_time_steps):
     return max(eps - (max_eps - min_eps) / max_time_steps, min_eps)
 
+def make_snake_env(env_id):
+    env = gym.make(env_id)
+    env = NoImprovementWrapper(env)
+    return env
+
 if __name__ == "__main__":
     # Vec env construction for both train and test
     train_envs = ts.env.DummyVectorEnv(
-        [lambda: gym.make("snake-gym-grid-10x20-1d-v0") for _ in range(num_train_env)])
+        [lambda: make_snake_env("snake-gym-grid-10x20-1d-v0") for _ in range(num_train_env)])
 
     test_envs = ts.env.DummyVectorEnv(
-        [lambda: gym.make("snake-gym-grid-10x20-1d-v0") for _ in range(num_test_env)])
+        [lambda: make_snake_env("snake-gym-grid-10x20-1d-v0") for _ in range(num_test_env)])
 
     # model construction
     model = MLPNet(feature_shape, num_action, device=args.device).to(args.device)
