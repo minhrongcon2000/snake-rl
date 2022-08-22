@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--num_train_env", 
     type=int,
-    default=5,
+    default=10,
     help="Number of parallel training env"
 )
 parser.add_argument(
@@ -115,10 +115,10 @@ def linear_exploration(eps, max_eps, min_eps, max_time_steps):
 
 if __name__ == "__main__":
     # Vec env construction for both train and test
-    train_envs = ts.env.ShmemVectorEnv(
+    train_envs = ts.env.DummyVectorEnv(
         [lambda: gym.make("snake-gym-grid-10x20-1d-v0") for _ in range(num_train_env)])
 
-    test_envs = ts.env.ShmemVectorEnv(
+    test_envs = ts.env.DummyVectorEnv(
         [lambda: gym.make("snake-gym-grid-10x20-1d-v0") for _ in range(num_test_env)])
 
     # model construction
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     if args.wandb_api_key is not None:
         wandb.init(project="tianshou_snake", name="DQN")
     
-    for _ in range(num_epochs):
+    for i in range(num_epochs):
         collect_result = train_collector.collect(n_step=step_per_epochs)
         losses = policy.update(batch_size, train_collector.buffer)
         
@@ -173,8 +173,7 @@ if __name__ == "__main__":
                 "reward_std": result["rew_std"],
                 "eps": current_eps,
             })
-        else:
-            print(result)
+        print(f"Epoch {i + 1}, mean_reward: {result['rew']}, reward_std: {result['rew_std']}")
         current_eps = linear_exploration(current_eps, 
                                         max_eps=max_eps, 
                                         min_eps=min_eps, 
