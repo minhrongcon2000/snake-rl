@@ -104,6 +104,20 @@ parser.add_argument(
     help="max buffer size"
 )
 
+parser.add_argument(
+    "--estimation_step",
+    type=int,
+    default=1,
+    help="n-step return"
+)
+
+parser.add_argument(
+    "--update_freq",
+    type=int,
+    default=320,
+    help="target network update frequency"
+)
+
 args = parser.parse_args()
 
 feature_shape = 8 # specifically for snake 1D, cannot be changed
@@ -149,8 +163,8 @@ if __name__ == "__main__":
     policy = ts.policy.DQNPolicy(
         model=model,
         optim=optim,
-        estimation_step=1,
-        target_update_freq=320,
+        estimation_step=args.estimation_step,
+        target_update_freq=args.update_freq,
         is_double=True
     )
 
