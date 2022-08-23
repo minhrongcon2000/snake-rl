@@ -1,4 +1,3 @@
-from datetime import datetime
 import os
 import tianshou as ts
 import gym
@@ -119,13 +118,6 @@ parser.add_argument(
     help="target network update frequency"
 )
 
-parser.add_argument(
-    "--chkpt_path",
-    type=str,
-    default="dqn_{}.pth".format(datetime.now()),
-    help="model path"
-)
-
 args = parser.parse_args()
 
 feature_shape = 8 # specifically for snake 1D, cannot be changed
@@ -140,6 +132,10 @@ episode_per_test = args.episode_per_test
 
 if args.wandb_api_key is not None:
     os.environ["WANDB_API_KEY"] = args.wandb_api_key
+    
+# if not os.path.exists(args.chkpt_path):
+#     os.makedirs(args.chkpt_path)
+# model_chkpt_dir = args.chkpt_path
 
 # for exploration step
 max_eps = args.max_eps
@@ -157,10 +153,10 @@ def make_snake_env(env_id, max_no_eating):
 
 if __name__ == "__main__":
     # Vec env construction for both train and test
-    train_envs = ts.env.DummyVectorEnv(
+    train_envs = ts.env.ShmemVectorEnv(
         [lambda: make_snake_env("snake-gym-grid-10x20-1d-v0", max_no_eating=args.max_no_eating) for _ in range(num_train_env)])
 
-    test_envs = ts.env.DummyVectorEnv(
+    test_envs = ts.env.ShmemVectorEnv(
         [lambda: make_snake_env("snake-gym-grid-10x20-1d-v0", max_no_eating=args.max_no_eating) for _ in range(num_test_env)])
 
     # model construction
@@ -197,10 +193,14 @@ if __name__ == "__main__":
     )
     current_eps = max_eps
     policy.set_eps(current_eps)
-    print("Start training...")
     
     if args.wandb_api_key is not None:
         wandb.init(project="tianshou_snake", name="DQN")
+        
+    print("Start training...")
+    
+    max_mean_reward = None
+    min_std_reward = None
     
     for i in range(num_epochs):
         collect_result = train_collector.collect(n_step=step_per_epochs)
@@ -215,11 +215,20 @@ if __name__ == "__main__":
                 "reward_std": result["rew_std"],
                 "eps": current_eps,
             })
+        
+        if max_mean_reward is None or result["rew"] > max_mean_reward or (result["rew"] == max_mean_reward and result["rew_std"] < min_std_reward):
+            max_mean_reward = result["rew"]
+            min_std_reward = result["rew_std"]
+            model_path = os.path.join(wandb.run.dir, "chkpt_epoch_{}_reward_{:.2f}_std_{:.2f}.pth".format(i + 1, result["rew"], result["rew_std"])) \
+                if args.wandb_api_key is not None else "chkpt_epoch_{}_reward_{:.2f}_std_{:.2f}.pth".format(i + 1, result["rew"], result["rew_std"])
+            torch.save(policy.state_dict(), model_path)
+            
         print(f"Epoch {i + 1}, mean_reward: {result['rew']}, reward_std: {result['rew_std']}, eps: {current_eps}")
+        
+        
         current_eps = linear_exploration(current_eps, 
                                         max_eps=max_eps, 
                                         min_eps=min_eps, 
                                         max_time_steps=max_time_steps)
+        
         policy.set_eps(current_eps)
-
-torch.save(policy.state_dict(), args.chkpt_path)
