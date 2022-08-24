@@ -167,7 +167,7 @@ if __name__ == "__main__":
                    input_height=input_height,
                    num_actions=num_actions,
                    device=args.device).to(args.device)
-    optim = torch.optim.Adam(model.parameters(), lr=1e-3)
+    optim = torch.optim.Adam(model.parameters(), lr=1e-4)
 
     # Double DQN because vanilla is kinda sht!
     policy = ts.policy.DQNPolicy(
