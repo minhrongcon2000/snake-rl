@@ -201,7 +201,7 @@ if __name__ == "__main__":
     policy.set_eps(current_eps)
     
     if args.wandb_api_key is not None:
-        wandb.init(project="tianshou_snake", name="DQN")
+        wandb.init(project="tianshou_snake", name="DQN_CNN")
         
     print("Start training...")
     
