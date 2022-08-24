@@ -156,10 +156,10 @@ def make_snake_env(env_id, max_no_eating):
 if __name__ == "__main__":
     # Vec env construction for both train and test
     train_envs = ts.env.DummyVectorEnv(
-        [lambda: make_snake_env("snake-gym-grid-10x20-normal-v0", max_no_eating=args.max_no_eating) for _ in range(num_train_env)])
+        [lambda: make_snake_env("snake-gym-grid-10x20-tiny-v0", max_no_eating=args.max_no_eating) for _ in range(num_train_env)])
 
     test_envs = ts.env.DummyVectorEnv(
-        [lambda: make_snake_env("snake-gym-grid-10x20-normal-v0", max_no_eating=args.max_no_eating) for _ in range(num_test_env)])
+        [lambda: make_snake_env("snake-gym-grid-10x20-tiny-v0", max_no_eating=args.max_no_eating) for _ in range(num_test_env)])
 
     # model construction
     model = CNNNet(input_channels=input_channels, 
