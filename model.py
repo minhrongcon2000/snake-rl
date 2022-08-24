@@ -44,7 +44,7 @@ class CNNNet(torch.nn.Module):
         )
         
         with torch.no_grad():
-            random_noise = torch.rand(self.input_channels, self.input_height, self.input_width)
+            random_noise = torch.rand(1, self.input_channels, self.input_height, self.input_width)
             n_flatten = self.cnn(random_noise).shape[1]
             
         self.q_estimate = torch.nn.Sequential(
