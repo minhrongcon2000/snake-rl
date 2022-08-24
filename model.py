@@ -54,6 +54,7 @@ class CNNNet(torch.nn.Module):
         
     def forward(self, obs, state=None, info={}):
         obs = torch.as_tensor(obs, device=self.device, dtype=torch.float32)
+        obs = obs.permute(0, 3, 1, 2)
         obs = self.cnn(obs)
         obs = self.q_estimate(obs)
         return obs, state
