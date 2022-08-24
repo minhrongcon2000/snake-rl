@@ -132,3 +132,5 @@ logs
 wandb
 
 *.pth
+
+.DS_Store
